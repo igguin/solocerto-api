@@ -64,4 +64,30 @@ public class AgricultoresController : ControllerBase
             new { id = agricultor.Id },
             agricultor);
     }
+
+    // PUT: api/agricultores/1
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Atualizar(
+        int id, Agricultor dados)
+    {
+        var agricultor = await _context.Agricultores.FindAsync(id);
+
+        if (agricultor == null)
+            return NotFound("Agricultor não encontrado.");
+
+        if (string.IsNullOrWhiteSpace(dados.Nome))
+            return BadRequest("O nome é obrigatório.");
+
+        if (string.IsNullOrWhiteSpace(dados.Cidade))
+            return BadRequest("A cidade é obrigatória.");
+
+        agricultor.Nome = dados.Nome;
+        agricultor.Cidade = dados.Cidade;
+        agricultor.Email = dados.Email;
+
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
 }
