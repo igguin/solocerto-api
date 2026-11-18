@@ -1,0 +1,6 @@
+@SoloCerto.Api_HostAddress = http://localhost:5185
+
+GET {{SoloCerto.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
