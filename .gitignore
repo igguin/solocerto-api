@@ -8,4 +8,4 @@ obj/
 *.db-journal
 *.user
 *.suo
-.env
+.envTestResults/

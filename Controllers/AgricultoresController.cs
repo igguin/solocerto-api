@@ -1,93 +1,64 @@
-
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SoloCerto.Api.Data;
-using SoloCerto.Api.Models;
+using SoloCerto.Api.DTOs;
+using SoloCerto.Api.Interfaces;
 
 namespace SoloCerto.Api.Controllers;
 
+/// <summary>Cadastro dos pequenos produtores rurais.</summary>
 [ApiController]
 [Route("api/[controller]")]
-public class AgricultoresController : ControllerBase
+[Produces("application/json")]
+public class AgricultoresController(IAgricultorService servico) : ControllerBase
 {
-    private readonly AppDbContext _context;
-
-    public AgricultoresController(AppDbContext context)
-    {
-        _context = context;
-    }
-
-    // GET: api/agricultores
+    /// <summary>Lista os agricultores, opcionalmente filtrando por cidade.</summary>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Agricultor>>> Listar()
-    {
-        var agricultores = await _context.Agricultores
-            .AsNoTracking()
-            .OrderBy(a => a.Nome)
-            .ToListAsync();
+    [ProducesResponseType<IReadOnlyList<AgricultorResponse>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<AgricultorResponse>>> Listar([FromQuery] string? cidade,
+                                                                            CancellationToken ct) =>
+        Ok(await servico.ListarAsync(cidade, ct));
 
-        return Ok(agricultores);
-    }
+    /// <summary>Consulta um agricultor pelo ID.</summary>
+    [HttpGet("{id:int}")]
+    [ProducesResponseType<AgricultorResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<AgricultorResponse>> BuscarPorId(int id, CancellationToken ct) =>
+        Ok(await servico.ObterAsync(id, ct));
 
-    // GET: api/agricultores/1
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Agricultor>> BuscarPorId(int id)
-    {
-        var agricultor = await _context.Agricultores
-            .AsNoTracking()
-            .FirstOrDefaultAsync(a => a.Id == id);
+    /// <summary>Lista as plantações de um agricultor.</summary>
+    [HttpGet("{id:int}/plantacoes")]
+    [ProducesResponseType<IReadOnlyList<PlantacaoResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IReadOnlyList<PlantacaoResponse>>> ListarPlantacoes(int id, CancellationToken ct) =>
+        Ok(await servico.ListarPlantacoesAsync(id, ct));
 
-        if (agricultor == null)
-            return NotFound();
-
-        return Ok(agricultor);
-    }
-
-    // POST: api/agricultores
+    /// <summary>Cadastra um agricultor.</summary>
     [HttpPost]
-    public async Task<ActionResult<Agricultor>> Cadastrar(
-        Agricultor agricultor)
+    [ProducesResponseType<AgricultorResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<AgricultorResponse>> Cadastrar(AgricultorRequest dados, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(agricultor.Nome))
-            return BadRequest("O nome é obrigatório.");
-
-        if (string.IsNullOrWhiteSpace(agricultor.Cidade))
-            return BadRequest("A cidade é obrigatória.");
-
-        agricultor.Id = 0;
-
-        _context.Agricultores.Add(agricultor);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction(
-            nameof(BuscarPorId),
-            new { id = agricultor.Id },
-            agricultor);
+        var criado = await servico.CriarAsync(dados, ct);
+        return CreatedAtAction(nameof(BuscarPorId), new { id = criado.Id }, criado);
     }
 
-    // PUT: api/agricultores/1
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Atualizar(
-        int id, Agricultor dados)
+    /// <summary>Atualiza nome, cidade e e-mail de um agricultor.</summary>
+    [HttpPut("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Atualizar(int id, AgricultorRequest dados, CancellationToken ct)
     {
-        var agricultor = await _context.Agricultores.FindAsync(id);
-
-        if (agricultor == null)
-            return NotFound("Agricultor não encontrado.");
-
-        if (string.IsNullOrWhiteSpace(dados.Nome))
-            return BadRequest("O nome é obrigatório.");
-
-        if (string.IsNullOrWhiteSpace(dados.Cidade))
-            return BadRequest("A cidade é obrigatória.");
-
-        agricultor.Nome = dados.Nome;
-        agricultor.Cidade = dados.Cidade;
-        agricultor.Email = dados.Email;
-
-        await _context.SaveChangesAsync();
-
+        await servico.AtualizarAsync(id, dados, ct);
         return NoContent();
     }
 
+    /// <summary>Exclui um agricultor e, em cascata, suas plantações e histórico.</summary>
+    [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Excluir(int id, CancellationToken ct)
+    {
+        await servico.RemoverAsync(id, ct);
+        return NoContent();
+    }
 }

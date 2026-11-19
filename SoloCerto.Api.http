@@ -1,6 +1,41 @@
-@SoloCerto.Api_HostAddress = http://localhost:5185
+# Requisições de exemplo (VS Code REST Client / Visual Studio). Dados fictícios.
+@base = http://localhost:5185
 
-GET {{SoloCerto.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Listar agricultores
+GET {{base}}/api/agricultores
 
-###
+### Cadastrar agricultor
+POST {{base}}/api/agricultores
+Content-Type: application/json
+
+{ "nome": "Carlos Pereira", "cidade": "Amparo", "email": "carlos@exemplo.com" }
+
+### Cadastrar plantação
+POST {{base}}/api/plantacoes
+Content-Type: application/json
+
+{ "agricultorId": 1, "cultura": "Feijão", "areaHectares": 2.5, "umidadeCritica": 24, "umidadeIdeal": 34 }
+
+### Módulo de IA envia previsão de chuva (probabilidade 0 a 1)
+POST {{base}}/api/previsoes-chuva
+Content-Type: application/json
+
+{ "plantacaoId": 1, "probabilidade": 0.82, "fonte": "modelo-random-forest-inmet" }
+
+### Registrar medição (devolve a recomendação de irrigação)
+POST {{base}}/api/medicoes
+Content-Type: application/json
+
+{ "plantacaoId": 1, "umidadePercentual": 31, "origem": "Sensor" }
+
+### Situação atual da plantação
+GET {{base}}/api/plantacoes/1/situacao
+
+### Histórico dos últimos 7 dias
+GET {{base}}/api/plantacoes/1/historico?dias=7
+
+### Reavaliar plantação agora
+POST {{base}}/api/recomendacoes/avaliar/1
+
+### Indicadores de impacto
+GET {{base}}/api/indicadores

@@ -1,0 +1,1851 @@
+{
+    "openapi": "3.1.1",
+    "info": {
+        "title": "SoloCerto API",
+        "description": "Apoio à decisão de irrigação para pequenos produtores rurais: cadastro de agricultores e plantações, registro de umidade do solo, previsões de chuva vindas do módulo de IA e recomendações de irrigação. GS FIAP 2026.2 · CitizenTech.",
+        "version": "v1"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:5185/"
+        }
+    ],
+    "paths": {
+        "/api/Agricultores": {
+            "get": {
+                "tags": [
+                    "Agricultores"
+                ],
+                "summary": "Lista os agricultores, opcionalmente filtrando por cidade.",
+                "parameters": [
+                    {
+                        "name": "cidade",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AgricultorResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Agricultores"
+                ],
+                "summary": "Cadastra um agricultor.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AgricultorRequest"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AgricultorRequest"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AgricultorRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AgricultorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/Agricultores/{id}": {
+            "get": {
+                "tags": [
+                    "Agricultores"
+                ],
+                "summary": "Consulta um agricultor pelo ID.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "pattern": "^-?(?:0|[1-9]\\d*)$",
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AgricultorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Agricultores"
+                ],
+                "summary": "Atualiza nome, cidade e e-mail de um agricultor.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "pattern": "^-?(?:0|[1-9]\\d*)$",
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AgricultorRequest"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AgricultorRequest"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AgricultorRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Agricultores"
+                ],
+                "summary": "Exclui um agricultor e, em cascata, suas plantações e histórico.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "pattern": "^-?(?:0|[1-9]\\d*)$",
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/Agricultores/{id}/plantacoes": {
+            "get": {
+                "tags": [
+                    "Agricultores"
+                ],
+                "summary": "Lista as plantações de um agricultor.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "pattern": "^-?(?:0|[1-9]\\d*)$",
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PlantacaoResponse"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/indicadores": {
+            "get": {
+                "tags": [
+                    "Indicadores"
+                ],
+                "summary": "Totais, recomendações por tipo, % de irrigações evitadas e plantações em situação crítica.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IndicadoresResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/medicoes": {
+            "post": {
+                "tags": [
+                    "Medicoes"
+                ],
+                "summary": "Registra uma medição e devolve, na mesma resposta, a recomendação de irrigação.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MedicaoRequest"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MedicaoRequest"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MedicaoRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RegistroMedicaoResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Medicoes"
+                ],
+                "summary": "Lista as medições de uma plantação, com período opcional.",
+                "parameters": [
+                    {
+                        "name": "plantacaoId",
+                        "in": "query",
+                        "schema": {
+                            "pattern": "^-?(?:0|[1-9]\\d*)$",
+                            "type": [
+                                "integer",
+                                "string"
+                            ],
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "desde",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "ate",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/MedicaoResponse"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/Plantacoes": {
+            "get": {
+                "tags": [
+                    "Plantacoes"
+                ],
+                "summary": "Lista plantações, com filtros opcionais por agricultor e cultura.",
+                "parameters": [
+                    {
+                        "name": "agricultorId",
+                        "in": "query",
+                        "schema": {
+                            "pattern": "^-?(?:0|[1-9]\\d*)$",
+                            "type": [
+                                "integer",
+                                "string"
+                            ],
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "cultura",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PlantacaoResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Plantacoes"
+                ],
+                "summary": "Cadastra uma plantação com a faixa de umidade adequada para a cultura.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlantacaoRequest"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlantacaoRequest"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlantacaoRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlantacaoResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/Plantacoes/{id}": {
+            "get": {
+                "tags": [
+                    "Plantacoes"
+                ],
+                "summary": "Consulta uma plantação pelo ID.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "pattern": "^-?(?:0|[1-9]\\d*)$",
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlantacaoResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Plantacoes"
+                ],
+                "summary": "Atualiza cultura, área e faixa de umidade.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "pattern": "^-?(?:0|[1-9]\\d*)$",
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlantacaoUpdateRequest"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlantacaoUpdateRequest"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PlantacaoUpdateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Plantacoes"
+                ],
+                "summary": "Exclui a plantação e seu histórico.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "pattern": "^-?(?:0|[1-9]\\d*)$",
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/Plantacoes/{id}/situacao": {
+            "get": {
+                "tags": [
+                    "Plantacoes"
+                ],
+                "summary": "Situação atual: última medição, previsão de chuva vigente e última recomendação.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "pattern": "^-?(?:0|[1-9]\\d*)$",
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SituacaoPlantacaoResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/Plantacoes/{id}/historico": {
+            "get": {
+                "tags": [
+                    "Plantacoes"
+                ],
+                "summary": "Histórico de medições e recomendações dos últimos N dias, com média, mínima e máxima.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "pattern": "^-?(?:0|[1-9]\\d*)$",
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "dias",
+                        "in": "query",
+                        "schema": {
+                            "pattern": "^-?(?:0|[1-9]\\d*)$",
+                            "type": [
+                                "integer",
+                                "string"
+                            ],
+                            "format": "int32",
+                            "default": 30
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HistoricoPlantacaoResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/previsoes-chuva": {
+            "post": {
+                "tags": [
+                    "PrevisoesChuva"
+                ],
+                "summary": "Recebe a probabilidade de chuva (≥ 1 mm em 24 h) calculada pelo modelo de IA.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PrevisaoChuvaRequest"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PrevisaoChuvaRequest"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PrevisaoChuvaRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PrevisaoChuvaResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "PrevisoesChuva"
+                ],
+                "summary": "Lista as previsões recebidas para uma plantação.",
+                "parameters": [
+                    {
+                        "name": "plantacaoId",
+                        "in": "query",
+                        "schema": {
+                            "pattern": "^-?(?:0|[1-9]\\d*)$",
+                            "type": [
+                                "integer",
+                                "string"
+                            ],
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PrevisaoChuvaResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/recomendacoes/avaliar/{plantacaoId}": {
+            "post": {
+                "tags": [
+                    "Recomendacoes"
+                ],
+                "summary": "Reavalia a plantação agora (última medição + previsão vigente) e grava a recomendação.",
+                "parameters": [
+                    {
+                        "name": "plantacaoId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "pattern": "^-?(?:0|[1-9]\\d*)$",
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RecomendacaoResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetails"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/recomendacoes": {
+            "get": {
+                "tags": [
+                    "Recomendacoes"
+                ],
+                "summary": "Lista recomendações (mais recentes primeiro), com filtros opcionais.",
+                "parameters": [
+                    {
+                        "name": "plantacaoId",
+                        "in": "query",
+                        "schema": {
+                            "pattern": "^-?(?:0|[1-9]\\d*)$",
+                            "type": [
+                                "integer",
+                                "string"
+                            ],
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "tipo",
+                        "in": "query",
+                        "schema": {
+                            "$ref": "#/components/schemas/TipoRecomendacao"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/RecomendacaoResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AgricultorRequest": {
+                "required": [
+                    "nome",
+                    "cidade",
+                    "email"
+                ],
+                "type": "object",
+                "properties": {
+                    "nome": {
+                        "type": "string"
+                    },
+                    "cidade": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    }
+                },
+                "description": "Dados para cadastrar ou atualizar um agricultor."
+            },
+            "AgricultorResponse": {
+                "required": [
+                    "id",
+                    "nome",
+                    "cidade",
+                    "email",
+                    "criadoEm",
+                    "totalPlantacoes"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "nome": {
+                        "type": "string"
+                    },
+                    "cidade": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "criadoEm": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "totalPlantacoes": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    }
+                }
+            },
+            "FaixaUmidade": {
+                "enum": [
+                    "Critica",
+                    "Baixa",
+                    "Adequada"
+                ]
+            },
+            "HistoricoPlantacaoResponse": {
+                "required": [
+                    "plantacaoId",
+                    "desde",
+                    "totalMedicoes",
+                    "umidadeMedia",
+                    "umidadeMinima",
+                    "umidadeMaxima",
+                    "medicoes",
+                    "recomendacoes"
+                ],
+                "type": "object",
+                "properties": {
+                    "plantacaoId": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "desde": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "totalMedicoes": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "umidadeMedia": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "null",
+                            "number",
+                            "string"
+                        ],
+                        "format": "double"
+                    },
+                    "umidadeMinima": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "null",
+                            "number",
+                            "string"
+                        ],
+                        "format": "double"
+                    },
+                    "umidadeMaxima": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "null",
+                            "number",
+                            "string"
+                        ],
+                        "format": "double"
+                    },
+                    "medicoes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MedicaoResponse"
+                        }
+                    },
+                    "recomendacoes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RecomendacaoResponse"
+                        }
+                    }
+                }
+            },
+            "IndicadoresResponse": {
+                "required": [
+                    "totalAgricultores",
+                    "totalPlantacoes",
+                    "totalMedicoes",
+                    "totalRecomendacoes",
+                    "recomendacoesPorTipo",
+                    "irrigacoesEvitadas",
+                    "percentualIrrigacoesEvitadas",
+                    "areaMonitoradaHectares",
+                    "umidadePorCultura",
+                    "plantacoesEmSituacaoCritica"
+                ],
+                "type": "object",
+                "properties": {
+                    "totalAgricultores": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "totalPlantacoes": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "totalMedicoes": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "totalRecomendacoes": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "recomendacoesPorTipo": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TotalPorTipo"
+                        }
+                    },
+                    "irrigacoesEvitadas": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "percentualIrrigacoesEvitadas": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "description": "Das recomendações em que a umidade estava abaixo do ideal, quantas % foram \"aguardar chuva\"\n(irrigação potencialmente desnecessária evitada).",
+                        "format": "double"
+                    },
+                    "areaMonitoradaHectares": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "format": "double"
+                    },
+                    "umidadePorCultura": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UmidadePorCultura"
+                        }
+                    },
+                    "plantacoesEmSituacaoCritica": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PlantacaoCritica"
+                        }
+                    }
+                },
+                "description": "Indicadores de impacto do SoloCerto."
+            },
+            "MedicaoRequest": {
+                "required": [
+                    "plantacaoId",
+                    "umidadePercentual",
+                    "medidoEm"
+                ],
+                "type": "object",
+                "properties": {
+                    "plantacaoId": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "description": "Plantação medida.",
+                        "format": "int32"
+                    },
+                    "umidadePercentual": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "description": "Umidade do solo em % (0 a 100).",
+                        "format": "double"
+                    },
+                    "medidoEm": {
+                        "type": [
+                            "null",
+                            "string"
+                        ],
+                        "description": "Momento da leitura (UTC). Se omitido, usa o horário atual.",
+                        "format": "date-time"
+                    },
+                    "origem": {
+                        "description": "Sensor ou Manual.",
+                        "$ref": "#/components/schemas/OrigemMedicao"
+                    }
+                },
+                "description": "Leitura de umidade do solo. Ao registrar, a API já devolve a recomendação de irrigação."
+            },
+            "MedicaoResponse": {
+                "required": [
+                    "id",
+                    "plantacaoId",
+                    "umidadePercentual",
+                    "medidoEm",
+                    "origem",
+                    "faixa"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "plantacaoId": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "umidadePercentual": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "format": "double"
+                    },
+                    "medidoEm": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "origem": {
+                        "$ref": "#/components/schemas/OrigemMedicao"
+                    },
+                    "faixa": {
+                        "$ref": "#/components/schemas/FaixaUmidade"
+                    }
+                }
+            },
+            "OrigemMedicao": {
+                "enum": [
+                    "Sensor",
+                    "Manual"
+                ]
+            },
+            "PlantacaoCritica": {
+                "required": [
+                    "plantacaoId",
+                    "cultura",
+                    "agricultor",
+                    "cidade",
+                    "umidadeConsiderada",
+                    "recomendadoEm"
+                ],
+                "type": "object",
+                "properties": {
+                    "plantacaoId": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "cultura": {
+                        "type": "string"
+                    },
+                    "agricultor": {
+                        "type": "string"
+                    },
+                    "cidade": {
+                        "type": "string"
+                    },
+                    "umidadeConsiderada": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "null",
+                            "number",
+                            "string"
+                        ],
+                        "format": "double"
+                    },
+                    "recomendadoEm": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "PlantacaoRequest": {
+                "required": [
+                    "agricultorId",
+                    "cultura",
+                    "areaHectares",
+                    "umidadeCritica",
+                    "umidadeIdeal"
+                ],
+                "type": "object",
+                "properties": {
+                    "agricultorId": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "description": "Dono da plantação.",
+                        "format": "int32"
+                    },
+                    "cultura": {
+                        "type": "string",
+                        "description": "Ex.: Milho, Tomate, Café."
+                    },
+                    "areaHectares": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "description": "Área em hectares (maior que zero).",
+                        "format": "double"
+                    },
+                    "umidadeCritica": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "description": "Umidade do solo (%) abaixo da qual a irrigação é prioritária.",
+                        "format": "double"
+                    },
+                    "umidadeIdeal": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "description": "Umidade do solo (%) considerada adequada.",
+                        "format": "double"
+                    }
+                },
+                "description": "Dados para cadastrar uma área de cultivo."
+            },
+            "PlantacaoResponse": {
+                "required": [
+                    "id",
+                    "agricultorId",
+                    "cultura",
+                    "areaHectares",
+                    "umidadeCritica",
+                    "umidadeIdeal",
+                    "criadoEm"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "agricultorId": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "cultura": {
+                        "type": "string"
+                    },
+                    "areaHectares": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "format": "double"
+                    },
+                    "umidadeCritica": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "format": "double"
+                    },
+                    "umidadeIdeal": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "format": "double"
+                    },
+                    "criadoEm": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "PlantacaoUpdateRequest": {
+                "required": [
+                    "cultura",
+                    "areaHectares",
+                    "umidadeCritica",
+                    "umidadeIdeal"
+                ],
+                "type": "object",
+                "properties": {
+                    "cultura": {
+                        "type": "string"
+                    },
+                    "areaHectares": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "format": "double"
+                    },
+                    "umidadeCritica": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "format": "double"
+                    },
+                    "umidadeIdeal": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "format": "double"
+                    }
+                },
+                "description": "Dados para atualizar uma área de cultivo."
+            },
+            "PrevisaoChuvaRequest": {
+                "required": [
+                    "plantacaoId",
+                    "probabilidade",
+                    "validaAPartirDe"
+                ],
+                "type": "object",
+                "properties": {
+                    "plantacaoId": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "description": "Plantação a que a previsão se aplica.",
+                        "format": "int32"
+                    },
+                    "probabilidade": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "description": "Probabilidade de chuva ≥ 1 mm em 24 h, entre 0 e 1.",
+                        "format": "double"
+                    },
+                    "validaAPartirDe": {
+                        "type": [
+                            "null",
+                            "string"
+                        ],
+                        "description": "Início da janela de 24 h (UTC). Se omitido, usa o horário atual.",
+                        "format": "date-time"
+                    },
+                    "fonte": {
+                        "type": "string",
+                        "description": "Origem da previsão.",
+                        "default": "modelo-random-forest-inmet"
+                    }
+                },
+                "description": "Previsão de chuva produzida pelo módulo de IA (Random Forest/INMET) para as próximas 24 h."
+            },
+            "PrevisaoChuvaResponse": {
+                "required": [
+                    "id",
+                    "plantacaoId",
+                    "probabilidade",
+                    "validaAPartirDe",
+                    "validaAte",
+                    "fonte"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "plantacaoId": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "probabilidade": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "format": "double"
+                    },
+                    "validaAPartirDe": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "validaAte": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "fonte": {
+                        "type": "string"
+                    }
+                }
+            },
+            "ProblemDetails": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "title": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "status": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "null",
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "detail": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "instance": {
+                        "type": [
+                            "null",
+                            "string"
+                        ]
+                    }
+                }
+            },
+            "RecomendacaoResponse": {
+                "required": [
+                    "id",
+                    "plantacaoId",
+                    "medicaoSoloId",
+                    "tipo",
+                    "mensagem",
+                    "justificativa",
+                    "regraAplicada",
+                    "umidadeConsiderada",
+                    "probabilidadeChuvaConsiderada",
+                    "irrigacaoEvitada",
+                    "geradaEm"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "plantacaoId": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "medicaoSoloId": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "null",
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "tipo": {
+                        "$ref": "#/components/schemas/TipoRecomendacao"
+                    },
+                    "mensagem": {
+                        "type": "string"
+                    },
+                    "justificativa": {
+                        "type": "string"
+                    },
+                    "regraAplicada": {
+                        "type": "string"
+                    },
+                    "umidadeConsiderada": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "null",
+                            "number",
+                            "string"
+                        ],
+                        "format": "double"
+                    },
+                    "probabilidadeChuvaConsiderada": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "null",
+                            "number",
+                            "string"
+                        ],
+                        "format": "double"
+                    },
+                    "irrigacaoEvitada": {
+                        "type": "boolean"
+                    },
+                    "geradaEm": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "description": "Recomendação de irrigação com mensagem simples para o produtor."
+            },
+            "RegistroMedicaoResponse": {
+                "required": [
+                    "medicao",
+                    "recomendacao"
+                ],
+                "type": "object",
+                "properties": {
+                    "medicao": {
+                        "$ref": "#/components/schemas/MedicaoResponse"
+                    },
+                    "recomendacao": {
+                        "$ref": "#/components/schemas/RecomendacaoResponse"
+                    }
+                }
+            },
+            "SituacaoPlantacaoResponse": {
+                "required": [
+                    "plantacao",
+                    "ultimaMedicao",
+                    "previsaoVigente",
+                    "ultimaRecomendacao"
+                ],
+                "type": "object",
+                "properties": {
+                    "plantacao": {
+                        "$ref": "#/components/schemas/PlantacaoResponse"
+                    },
+                    "ultimaMedicao": {
+                        "oneOf": [
+                            {
+                                "type": "null"
+                            },
+                            {
+                                "$ref": "#/components/schemas/MedicaoResponse"
+                            }
+                        ]
+                    },
+                    "previsaoVigente": {
+                        "oneOf": [
+                            {
+                                "type": "null"
+                            },
+                            {
+                                "$ref": "#/components/schemas/PrevisaoChuvaResponse"
+                            }
+                        ]
+                    },
+                    "ultimaRecomendacao": {
+                        "oneOf": [
+                            {
+                                "type": "null"
+                            },
+                            {
+                                "$ref": "#/components/schemas/RecomendacaoResponse"
+                            }
+                        ]
+                    }
+                }
+            },
+            "TipoRecomendacao": {
+                "enum": [
+                    "IrrigacaoPrioritaria",
+                    "IrrigarHoje",
+                    "AguardarChuva",
+                    "NaoIrrigar",
+                    "Reavaliar"
+                ]
+            },
+            "TotalPorTipo": {
+                "required": [
+                    "tipo",
+                    "quantidade"
+                ],
+                "type": "object",
+                "properties": {
+                    "tipo": {
+                        "$ref": "#/components/schemas/TipoRecomendacao"
+                    },
+                    "quantidade": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    }
+                }
+            },
+            "UmidadePorCultura": {
+                "required": [
+                    "cultura",
+                    "medicoes",
+                    "umidadeMedia"
+                ],
+                "type": "object",
+                "properties": {
+                    "cultura": {
+                        "type": "string"
+                    },
+                    "medicoes": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)$",
+                        "type": [
+                            "integer",
+                            "string"
+                        ],
+                        "format": "int32"
+                    },
+                    "umidadeMedia": {
+                        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                        "type": [
+                            "number",
+                            "string"
+                        ],
+                        "format": "double"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Agricultores"
+        },
+        {
+            "name": "Indicadores"
+        },
+        {
+            "name": "Medicoes"
+        },
+        {
+            "name": "Plantacoes"
+        },
+        {
+            "name": "PrevisoesChuva"
+        },
+        {
+            "name": "Recomendacoes"
+        }
+    ]
+}
